@@ -1,10 +1,23 @@
 use std::io;
+use std::env;
 use std::io::Read;
 use std::io::ErrorKind;
 use std::fs::OpenOptions;
 
 fn main() {
-    match list_content() {
+    let mut args = env::args();
+    match args.nth(1) {
+        Some(s) =>
+            match s.as_ref() {
+                "ls" | "list" => list_content(),
+                _ => println!("Error: Retarded argument")
+            },
+        None => println!("Missing args")
+    }
+}
+
+fn list_content() {
+    match try_list_content() {
         Ok(()) => (),
         Err(e) => 
             match e.kind() {
@@ -14,12 +27,13 @@ fn main() {
     }
 }
 
-fn list_content() -> io::Result<()> {
+fn try_list_content() -> io::Result<()> {
     //read file and print it
     let mut file = try!(
         OpenOptions::new()
         .read(true)
-        .open("todo.txt"));
+        .open("todo.txt")
+    );
     let mut content = String::new();
     match file.read_to_string(&mut content) {
         Ok(_) => print!("{}", content),
